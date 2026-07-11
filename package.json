@@ -1,0 +1,9 @@
+{
+  "name": "fleek-hack",
+  "private": true,
+  "packageManager": "pnpm@10.14.0",
+  "scripts": {
+    "test": "pnpm -r --if-present test",
+    "evals": "pnpm --filter @fleek/evals evals"
+  }
+}

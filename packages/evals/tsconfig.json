@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Node 22's built-in WebSocket matches the DOM type surface; @types/node
+    // doesn't declare the global yet.
+    "lib": ["ES2022", "DOM"]
+  },
+  "include": ["src", "test"]
+}

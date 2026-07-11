@@ -26,12 +26,17 @@ export function CallScreen({
   onEnd,
   onBack,
   onSend,
+  orbVolume,
 }: {
   state: CallState;
   onMute: () => void;
   onEnd: () => void;
   onBack: () => void;
   onSend: (text: string) => void;
+  orbVolume?: {
+    getInputVolume: () => number;
+    getOutputVolume: () => number;
+  };
 }) {
   const label = AGENT_LABEL[state.agent ?? "idle"];
 
@@ -48,7 +53,14 @@ export function CallScreen({
             <ChevronLeft className="size-5" />
           </button>
           <div className="relative size-9 shrink-0 overflow-hidden rounded-full ring-1 ring-border">
-            <Orb className="h-full w-full" colors={ORB_COLORS} agentState={state.agent} />
+            <Orb
+              className="h-full w-full"
+              colors={ORB_COLORS}
+              agentState={orbVolume ? undefined : state.agent}
+              volumeMode={orbVolume ? "manual" : "auto"}
+              getInputVolume={orbVolume?.getInputVolume}
+              getOutputVolume={orbVolume?.getOutputVolume}
+            />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-medium leading-tight text-foreground">

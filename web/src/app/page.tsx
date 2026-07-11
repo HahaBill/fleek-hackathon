@@ -1,5 +1,5 @@
-import { CallApp } from "@/components/call/call-app";
+import { CallProvider } from "@/components/call/call-provider";
 
 export default function Home() {
-  return <CallApp />;
+  return <CallProvider />;
 }

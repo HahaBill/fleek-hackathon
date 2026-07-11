@@ -1,9 +1,3 @@
-/**
- * Team shared contract — copied verbatim from plans/00-shared.md. This file is
- * the integration handshake for all four plans; fix drift HERE, never in a
- * consuming package. `web/src/lib/contracts.ts` is the frontend's zod-less
- * mirror of the same shapes and must stay field-compatible.
- */
 import { z } from "zod";
 
 // ---------- Lead & qualification ----------
@@ -139,7 +133,7 @@ export interface SessionTransport {
   setMuted?(muted: boolean): void;
 }
 
-// ---------- Wire credentials (voice mode; Plan 2 serves) ----------
+// ---------- Wire credentials (voice mode; Plan 2 serves, per plans/00-shared.md) ----------
 export type VoiceProvider = "openai" | "elevenlabs";
 export type VoiceCredentials =
   | { provider: "openai"; clientSecret: string }        // ephemeral Realtime client secret

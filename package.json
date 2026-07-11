@@ -1,7 +1,7 @@
 {
   "name": "fleek-hack",
   "private": true,
-  "packageManager": "pnpm@10.14.0",
+  "packageManager": "pnpm@9.15.9",
   "scripts": {
     "test": "pnpm -r --if-present test",
     "evals": "pnpm --filter @fleek/evals evals"

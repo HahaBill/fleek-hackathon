@@ -1,0 +1,61 @@
+{
+  "supplier": "Karachi Vintage Co.",
+  "stock": [
+    {
+      "category": "denim",
+      "styleTags": ["90s", "vintage", "jeans"],
+      "brands": ["Levi's", "Wrangler"],
+      "grade": "A/B",
+      "availability": "in stock",
+      "unitPriceRange": [2.1, 3.4],
+      "moq": 50,
+      "origin": "Karachi"
+    },
+    {
+      "category": "knitwear",
+      "styleTags": ["sweaters", "jumpers"],
+      "brands": [],
+      "grade": "A",
+      "availability": "in stock",
+      "unitPriceRange": [1.6, 2.2],
+      "moq": 100,
+      "origin": "Karachi"
+    },
+    {
+      "category": "graphic tees",
+      "styleTags": ["tees", "t-shirts", "printed"],
+      "brands": [],
+      "grade": "A/B/C",
+      "availability": "in stock",
+      "balePrice": 850,
+      "moq": 200,
+      "origin": "Karachi"
+    },
+    {
+      "category": "jackets",
+      "styleTags": ["outerwear", "bomber", "denim jacket"],
+      "brands": ["Carhartt", "Levi's"],
+      "grade": "A/B",
+      "availability": "in stock",
+      "unitPriceRange": [4.5, 7.2],
+      "moq": 40,
+      "origin": "Karachi"
+    },
+    {
+      "category": "workwear",
+      "styleTags": ["cargo", "overalls", "utility"],
+      "brands": ["Dickies", "Carhartt"],
+      "grade": "B",
+      "availability": "in stock",
+      "unitPriceRange": [2.8, 4.1],
+      "moq": 75,
+      "origin": "Karachi"
+    }
+  ],
+  "policies": {
+    "shipping_regions": ["UK", "EU", "US"],
+    "lead_times": "7–14 days to UK",
+    "payment_language": "50% deposit, balance before shipment",
+    "escalation_contact": "Imran (owner)"
+  }
+}

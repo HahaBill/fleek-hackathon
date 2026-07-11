@@ -8,6 +8,22 @@ importers:
 
   .: {}
 
+  packages/core:
+    dependencies:
+      '@fleek/shared':
+        specifier: workspace:*
+        version: link:../shared
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@26.1.1)
+
   packages/evals:
     dependencies:
       '@fleek/shared':
@@ -17,6 +33,9 @@ importers:
         specifier: workspace:*
         version: link:../summary
     devDependencies:
+      '@types/node':
+        specifier: ^22
+        version: 22.20.1
       '@types/ws':
         specifier: ^8.5.12
         version: 8.18.1
@@ -28,7 +47,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^2.1.0
-        version: 2.1.9(@types/node@26.1.1)
+        version: 2.1.9(@types/node@22.20.1)
       ws:
         specifier: ^8.18.0
         version: 8.21.0
@@ -36,8 +55,12 @@ importers:
   packages/shared:
     dependencies:
       zod:
-        specifier: ^3.23.8
+        specifier: ^3.24.1
         version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
 
   packages/summary:
     dependencies:
@@ -51,12 +74,15 @@ importers:
         specifier: ^3.23.8
         version: 3.25.76
     devDependencies:
+      '@types/node':
+        specifier: ^22
+        version: 22.20.1
       typescript:
         specifier: ^5.6.0
         version: 5.9.3
       vitest:
         specifier: ^2.1.0
-        version: 2.1.9(@types/node@26.1.1)
+        version: 2.1.9(@types/node@22.20.1)
 
 packages:
 
@@ -491,6 +517,9 @@ packages:
   '@types/node@18.19.130':
     resolution: {integrity: sha512-GRaXQx6jGfL8sKfaIDD6OupbIHBr9jv7Jnaml9tB7l4v068PAOXqfcujMMo5PhbIs6ggR1XODELqahT2R8v0fg==}
 
+  '@types/node@22.20.1':
+    resolution: {integrity: sha512-EANqOCF9QFyra+4pfxUcX9STKJpCLjMbObVzljIJomAWSnuSIEAvyzEU53GaajbXJEgdh0iEcPL+DGvpUd4k1Q==}
+
   '@types/node@26.1.1':
     resolution: {integrity: sha512-nxAkRSVkN1Y0JC1W8ky/fTfkGsMmcrRsbx+3XoZE+rMOX71kLYTV7fLXpqud1GpbpP5TuffXFqfX7fH2GgZREw==}
 
@@ -785,6 +814,9 @@ packages:
 
   undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
+
+  undici-types@6.21.0:
+    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
   undici-types@8.3.0:
     resolution: {integrity: sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ==}
@@ -1110,20 +1142,25 @@ snapshots:
 
   '@types/node-fetch@2.6.13':
     dependencies:
-      '@types/node': 18.19.130
+      '@types/node': 22.20.1
       form-data: 4.0.6
 
   '@types/node@18.19.130':
     dependencies:
       undici-types: 5.26.5
 
+  '@types/node@22.20.1':
+    dependencies:
+      undici-types: 6.21.0
+
   '@types/node@26.1.1':
     dependencies:
       undici-types: 8.3.0
+    optional: true
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 26.1.1
+      '@types/node': 22.20.1
 
   '@vitest/expect@2.1.9':
     dependencies:
@@ -1131,6 +1168,14 @@ snapshots:
       '@vitest/utils': 2.1.9
       chai: 5.3.3
       tinyrainbow: 1.2.0
+
+  '@vitest/mocker@2.1.9(vite@5.4.21(@types/node@22.20.1))':
+    dependencies:
+      '@vitest/spy': 2.1.9
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
+    optionalDependencies:
+      vite: 5.4.21(@types/node@22.20.1)
 
   '@vitest/mocker@2.1.9(vite@5.4.21(@types/node@26.1.1))':
     dependencies:
@@ -1458,7 +1503,28 @@ snapshots:
 
   undici-types@5.26.5: {}
 
-  undici-types@8.3.0: {}
+  undici-types@6.21.0: {}
+
+  undici-types@8.3.0:
+    optional: true
+
+  vite-node@2.1.9(@types/node@22.20.1):
+    dependencies:
+      cac: 6.7.14
+      debug: 4.4.3
+      es-module-lexer: 1.7.0
+      pathe: 1.1.2
+      vite: 5.4.21(@types/node@22.20.1)
+    transitivePeerDependencies:
+      - '@types/node'
+      - less
+      - lightningcss
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
 
   vite-node@2.1.9(@types/node@26.1.1):
     dependencies:
@@ -1478,6 +1544,15 @@ snapshots:
       - supports-color
       - terser
 
+  vite@5.4.21(@types/node@22.20.1):
+    dependencies:
+      esbuild: 0.21.5
+      postcss: 8.5.16
+      rollup: 4.62.2
+    optionalDependencies:
+      '@types/node': 22.20.1
+      fsevents: 2.3.3
+
   vite@5.4.21(@types/node@26.1.1):
     dependencies:
       esbuild: 0.21.5
@@ -1486,6 +1561,41 @@ snapshots:
     optionalDependencies:
       '@types/node': 26.1.1
       fsevents: 2.3.3
+
+  vitest@2.1.9(@types/node@22.20.1):
+    dependencies:
+      '@vitest/expect': 2.1.9
+      '@vitest/mocker': 2.1.9(vite@5.4.21(@types/node@22.20.1))
+      '@vitest/pretty-format': 2.1.9
+      '@vitest/runner': 2.1.9
+      '@vitest/snapshot': 2.1.9
+      '@vitest/spy': 2.1.9
+      '@vitest/utils': 2.1.9
+      chai: 5.3.3
+      debug: 4.4.3
+      expect-type: 1.4.0
+      magic-string: 0.30.21
+      pathe: 1.1.2
+      std-env: 3.10.0
+      tinybench: 2.9.0
+      tinyexec: 0.3.2
+      tinypool: 1.1.1
+      tinyrainbow: 1.2.0
+      vite: 5.4.21(@types/node@22.20.1)
+      vite-node: 2.1.9(@types/node@22.20.1)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 22.20.1
+    transitivePeerDependencies:
+      - less
+      - lightningcss
+      - msw
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
 
   vitest@2.1.9(@types/node@26.1.1):
     dependencies:

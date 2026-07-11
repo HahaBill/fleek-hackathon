@@ -38,12 +38,14 @@ export function SummaryCard({
   lead,
   prose,
   insights,
+  sections,
   feed,
   onNewCall,
 }: {
   lead: LeadRecord;
   prose: string;
   insights: string[];
+  sections?: { title: string; points: string[] }[];
   feed: FeedItem[];
   onNewCall: () => void;
 }) {
@@ -124,33 +126,54 @@ export function SummaryCard({
             </div>
           )}
 
-          {insights.length > 0 && (
-            <div className="flex flex-col gap-2.5 border-t border-border pt-4">
-              <p className="flex items-center gap-1.5 font-mono text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
-                <Lightbulb className="size-3" /> Key points
-              </p>
-              <ul className="flex flex-col gap-2">
-                {insights.map((it, i) => {
-                  // "Label — detail" renders as a bold label + muted detail
-                  // (Granola-style); anything else renders as a plain bullet.
-                  const split = it.indexOf(" — ");
-                  const label = split > 0 ? it.slice(0, split) : null;
-                  const detail = split > 0 ? it.slice(split + 3) : it;
-                  return (
-                    <li key={i} className="flex gap-2.5 text-xs leading-relaxed">
-                      <span className="mt-px text-fleek">&bull;</span>
-                      <span className="text-muted-foreground">
-                        {label && (
-                          <span className="font-semibold text-foreground">{label}</span>
-                        )}
-                        {label ? " — " : ""}
-                        {detail}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
+          {sections && sections.length > 0 ? (
+            /* Granola-style: titled sections the composer chose from the call. */
+            <div className="flex flex-col gap-4 border-t border-border pt-4">
+              {sections.map((section) => (
+                <div key={section.title} className="flex flex-col gap-1.5">
+                  <p className="flex items-center gap-1.5 font-mono text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
+                    <Lightbulb className="size-3" /> {section.title}
+                  </p>
+                  <ul className="flex flex-col gap-1.5">
+                    {section.points.map((point, i) => (
+                      <li key={i} className="flex gap-2.5 text-xs leading-relaxed">
+                        <span className="mt-px text-fleek">&bull;</span>
+                        <span className="text-muted-foreground">{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
+          ) : (
+            insights.length > 0 && (
+              <div className="flex flex-col gap-2.5 border-t border-border pt-4">
+                <p className="flex items-center gap-1.5 font-mono text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
+                  <Lightbulb className="size-3" /> Key points
+                </p>
+                <ul className="flex flex-col gap-2">
+                  {insights.map((it, i) => {
+                    // "Label — detail" renders as a bold label + muted detail;
+                    // anything else renders as a plain bullet.
+                    const split = it.indexOf(" — ");
+                    const label = split > 0 ? it.slice(0, split) : null;
+                    const detail = split > 0 ? it.slice(split + 3) : it;
+                    return (
+                      <li key={i} className="flex gap-2.5 text-xs leading-relaxed">
+                        <span className="mt-px text-fleek">&bull;</span>
+                        <span className="text-muted-foreground">
+                          {label && (
+                            <span className="font-semibold text-foreground">{label}</span>
+                          )}
+                          {label ? " — " : ""}
+                          {detail}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )
           )}
         </div>
 

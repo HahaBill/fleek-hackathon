@@ -104,6 +104,7 @@ export function CallApp() {
           lead={state.lead}
           prose={state.prose}
           insights={state.insights}
+          sections={state.sections}
           feed={state.feed}
           onNewCall={reset}
         />
@@ -114,6 +115,7 @@ export function CallApp() {
           lead={voice.summary.lead}
           prose={voice.summary.prose}
           insights={voice.summary.insights}
+          sections={voice.summary.sections}
           feed={voice.feed}
           onNewCall={voice.reset}
         />

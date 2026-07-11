@@ -28,6 +28,7 @@ export interface VoiceSummary {
   lead: LeadRecord;
   prose: string;
   insights: string[];
+  sections?: { title: string; points: string[] }[];
 }
 
 /** Rendered only if /api/voice-summary is unreachable — the card never blocks. */
@@ -96,7 +97,7 @@ export function useElevenLabsVoice() {
     setPhase("composing");
 
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 15_000);
+    const timer = setTimeout(() => controller.abort(), 25_000);
     try {
       const res = await fetch("/api/voice-summary", {
         method: "POST",
@@ -107,7 +108,12 @@ export function useElevenLabsVoice() {
       if (!res.ok) throw new Error(`${res.status}`);
       const out: VoiceSummary = await res.json();
       if (generationRef.current !== generation) return;
-      setSummary({ lead: out.lead, prose: out.prose, insights: out.insights ?? [] });
+      setSummary({
+        lead: out.lead,
+        prose: out.prose,
+        insights: out.insights ?? [],
+        sections: out.sections,
+      });
       setPhase("summary");
     } catch {
       if (generationRef.current !== generation) return;

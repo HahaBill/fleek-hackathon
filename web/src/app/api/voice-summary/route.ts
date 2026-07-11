@@ -51,9 +51,10 @@ export async function POST(request: Request) {
   // this path, and the core computes the honest terminal status from that.
   const lead = core.finalize("hangup");
 
-  // Headroom over the package's 5s default: first call in a fresh server pays
-  // SDK + TLS warm-up. Stays under the client fetch's 15s abort.
-  const agent = createSummaryAgent({ timeoutMs: 12_000 });
+  // Headroom over the package's 5s default: sectioned summaries on gpt-5.x
+  // run ~5s with slow tails, plus cold-start SDK + TLS on the first call.
+  // Stays under the client fetch's 25s abort.
+  const agent = createSummaryAgent({ timeoutMs: 20_000 });
   const summary = await agent({ lead, transcript, events });
   return Response.json({ lead, ...summary });
 }

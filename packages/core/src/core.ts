@@ -63,6 +63,10 @@ export function createCore(seed: SeedData): QualificationCore {
       sm.noteBuyerTurn(text);
     },
 
+    noteAgentTurn(text: string): void {
+      sm.noteAgentTurn(text);
+    },
+
     searchKnowledge(query: string, filters?: Record<string, string>): KnowledgeResult {
       const result = knowledge.searchKnowledge(query, filters);
       if (result.kind === "not_found") {

@@ -71,18 +71,20 @@ stateDiagram-v2
 
 ## Run it
 
-The UI runs against a mock transport that replays a scripted call, so it works with no backend. The real voice client drops in behind the same interface later.
+The UI runs against a mock transport that replays a scripted call, so text/demo mode works with no backend. Live voice chips need `@fleek/server` running alongside the web app.
 
 ```bash
-# core packages (pnpm workspace)
 pnpm install
-pnpm -r test          # run the qualification core tests
+pnpm -r test          # qualification core + server session tests
 
-# web app
-cd web
-npm install
-npm run dev           # open http://localhost:3000
+# terminal 1 — session API for live voice chip updates
+pnpm dev:server       # http://localhost:3001
+
+# terminal 2 — Next.js UI
+cd web && pnpm dev    # http://localhost:3000
 ```
+
+Or run both together: `pnpm dev`
 
 Demo shortcuts:
 
@@ -92,10 +94,12 @@ Demo shortcuts:
 ## Project layout
 
 ```
-packages/shared   Shared TypeScript contracts (events, lead, tools)
-packages/core     Deterministic qualification core, tests, seed catalogue
-web               Next.js single-screen UI (idle, call, summary)
-plans             Build plans
+packages/shared      Shared TypeScript contracts (events, lead, tools)
+packages/core        Deterministic qualification core, tests, seed catalogue
+packages/voice-client   Browser transport → @fleek/server (HTTP + WS)
+apps/server          Session API + WebSocket event bus for live voice chips
+web                  Next.js single-screen UI (idle, call, summary)
+plans              Build plans
 ```
 
 ## Stack

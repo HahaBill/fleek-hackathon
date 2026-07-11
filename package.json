@@ -3,7 +3,12 @@
   "private": true,
   "packageManager": "pnpm@9.15.9",
   "scripts": {
+    "dev": "pnpm --parallel --filter @fleek/server --filter web dev",
+    "dev:web": "pnpm --filter web dev",
+    "dev:server": "pnpm --filter @fleek/server dev",
+    "build": "pnpm --filter web build",
     "test": "pnpm -r --if-present test",
-    "evals": "pnpm --filter @fleek/evals evals"
+    "evals": "pnpm --filter @fleek/evals evals",
+    "typecheck": "pnpm -r typecheck"
   }
 }

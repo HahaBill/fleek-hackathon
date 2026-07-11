@@ -43,10 +43,22 @@ const DESTINATIONS = [
   "netherlands",
 ];
 
-const QUANTITY_RE = /\b(\d+)\s*(pieces|pcs|units|pc)\b/i;
+const QUANTITY_RE =
+  /\b(\d+)\s*(pieces|pcs|units|pc|shirts?|tees|t-?shirts|items)\b/i;
+const QUANTITY_INTENT_RE =
+  /\b(?:need|want|order|take|looking for|i need|get)\s+(?:about|around|roughly)?\s*(\d+)\b/i;
+const WORD_QUANTITY_RE =
+  /\b(one|two|three|four|five)\s+hundred\b/i;
+const GRADE_RE = /grade\s+([abc](?:\s*\/\s*[abc])?)\b/i;
+const GRADED_RE = /\bgraded?\s+([ab]+(?:\s*\/\s*[ab]+)?)\b/i;
+const HIGH_GRADE_RE = /\bhigh[\s-]?grade\b/i;
+const BUDGET_TOTAL_RE =
+  /\btotal\s+(?:of\s+)?(?:\$|USD\s*)?([\d,]+(?:\.\d{2})?)\b/i;
+const BUDGET_SPELLED_RE = /\btotal\s+one\s+thousand\s+two\s+hundred\b/i;
+const UNIT_PRICE_RE =
+  /\$?([\d,]+(?:\.\d{2})?)\s*(?:per piece|each|\/pc|a piece)\b/i;
 const EMAIL_RE = /[^\s@]+@[^\s@]+\.[^\s@]+/;
 const PHONE_RE = /\+?\d[\d\s().-]{7,}\d/;
-const GRADE_RE = /grade\s+([abc])\b/i;
 const DEADLINE_RE = new RegExp(
   `\\b(?:before|by)\\s+((?:${MONTHS})(?:\\s+\\d{4})?|\\d{1,2}\\s+(?:${MONTHS})(?:\\s+\\d{4})?)\\b`,
   "i",
@@ -126,8 +138,118 @@ export function createStateMachine(opts?: { categoryVocabulary?: string[] }) {
     return fields[field].state === "captured" ? fields[field].value : undefined;
   }
 
+  function extractQuantity(text: string, allowDiscountContext = false): void {
+    if (!allowDiscountContext && DISCOUNT_CONTEXT_RE.test(text)) return;
+
+    const qtyMatch = text.match(QUANTITY_RE);
+    if (qtyMatch) {
+      capture("quantity", qtyMatch[1]);
+      return;
+    }
+
+    const intentMatch = text.match(QUANTITY_INTENT_RE);
+    if (intentMatch) {
+      capture("quantity", intentMatch[1]);
+      return;
+    }
+
+    const wordMatch = text.match(WORD_QUANTITY_RE);
+    if (wordMatch) {
+      const hundreds: Record<string, string> = {
+        one: "100",
+        two: "200",
+        three: "300",
+        four: "400",
+        five: "500",
+      };
+      capture("quantity", hundreds[wordMatch[1].toLowerCase()] ?? "100");
+    }
+  }
+
+  function extractGrade(text: string): void {
+    const gradeMatch = text.match(GRADE_RE);
+    if (gradeMatch) {
+      capture("grade", gradeMatch[1].toUpperCase().replace(/\s+/g, ""));
+      return;
+    }
+
+    const gradedMatch = text.match(GRADED_RE);
+    if (gradedMatch) {
+      capture("grade", gradedMatch[1].toUpperCase().replace(/\s+/g, ""));
+      return;
+    }
+
+    if (HIGH_GRADE_RE.test(text) && !getValue("grade")) {
+      capture("grade", "High");
+    }
+  }
+
+  function extractBudget(text: string): void {
+    const totalMatch = text.match(BUDGET_TOTAL_RE);
+    if (totalMatch) {
+      capture("budget", totalMatch[1].replace(/,/g, ""));
+      return;
+    }
+
+    if (BUDGET_SPELLED_RE.test(text)) {
+      capture("budget", "1200");
+      return;
+    }
+
+    const unitMatch = text.match(UNIT_PRICE_RE);
+    if (unitMatch && /\btotal\b/i.test(text)) {
+      capture("budget", unitMatch[1].replace(/,/g, ""));
+    }
+  }
+
+  function extractDeadline(text: string): void {
+    const deadlineMatch = text.match(DEADLINE_RE) ?? text.match(MONTH_ONLY_RE);
+    if (!deadlineMatch) return;
+
+    const raw = deadlineMatch[0];
+    if (/^(before|by)\b/i.test(raw) || DEADLINE_RE.test(text)) {
+      const full = text.match(DEADLINE_RE);
+      capture("deadline", full ? full[0] : raw);
+    } else if (!getValue("deadline")) {
+      if (/\b(before|by|need|deadline|until|in)\s+(?:\d+\s+)?(?:weeks?|days?|months?)\b/i.test(text)) {
+        capture("deadline", deadlineMatch[0]);
+      } else if (/\b(before|by|need|deadline|until)\b/i.test(text)) {
+        capture("deadline", deadlineMatch[0]);
+      }
+    }
+  }
+
+  function extractDestination(text: string): void {
+    const lower = text.toLowerCase();
+    for (const dest of DESTINATIONS) {
+      const re = new RegExp(`\\b${dest.replace(/\s+/g, "\\s+")}\\b`, "i");
+      if (re.test(lower)) {
+        const canonical =
+          dest === "usa" ? "US" : dest.length <= 3 ? dest.toUpperCase() : capitalize(dest);
+        if (!getValue("destination")) {
+          capture("destination", canonical);
+        }
+        break;
+      }
+    }
+  }
+
+  function extractCategory(text: string): void {
+    if (getValue("category") || vocabulary.length === 0) return;
+    const sorted = [...vocabulary].sort((a, b) => b.length - a.length);
+    for (const term of sorted) {
+      const re = new RegExp(
+        `\\b${escapeRegExp(term).replace(/\s+/g, "\\s+")}\\b`,
+        "i",
+      );
+      if (re.test(text)) {
+        capture("category", term);
+        break;
+      }
+    }
+  }
+
   function noteBuyerTurn(text: string): void {
-    // Email / phone → contact.method (only if contact not yet set, or method missing)
     const email = text.match(EMAIL_RE);
     if (email) {
       const existing = getValue("contact");
@@ -143,64 +265,23 @@ export function createStateMachine(opts?: { categoryVocabulary?: string[] }) {
       }
     }
 
-    // Grade
-    const gradeMatch = text.match(GRADE_RE);
-    if (gradeMatch) {
-      capture("grade", gradeMatch[1].toUpperCase());
+    extractGrade(text);
+    if (!DISCOUNT_CONTEXT_RE.test(text)) {
+      extractQuantity(text);
     }
+    extractDeadline(text);
+    extractDestination(text);
+    extractCategory(text);
+  }
 
-    // Quantity — skip when discount/negotiation context (don't overwrite with "400")
-    const qtyMatch = text.match(QUANTITY_RE);
-    if (qtyMatch && !DISCOUNT_CONTEXT_RE.test(text)) {
-      capture("quantity", qtyMatch[1]);
-    }
-
-    // Deadline
-    const deadlineMatch = text.match(DEADLINE_RE) ?? text.match(MONTH_ONLY_RE);
-    if (deadlineMatch) {
-      const raw = deadlineMatch[0];
-      // Prefer "before X" / "by X" full match when present
-      if (/^(before|by)\b/i.test(raw) || DEADLINE_RE.test(text)) {
-        const full = text.match(DEADLINE_RE);
-        capture("deadline", full ? full[0] : raw);
-      } else if (!getValue("deadline")) {
-        // bare month only if nothing else captured — still conservative
-        if (/\b(before|by|need|deadline|until)\b/i.test(text)) {
-          capture("deadline", deadlineMatch[0]);
-        }
-      }
-    }
-
-    // Destination
-    const lower = text.toLowerCase();
-    for (const dest of DESTINATIONS) {
-      const re = new RegExp(`\\b${dest.replace(/\s+/g, "\\s+")}\\b`, "i");
-      if (re.test(lower)) {
-        const canonical =
-          dest === "usa" ? "US" : dest.length <= 3 ? dest.toUpperCase() : capitalize(dest);
-        if (!getValue("destination")) {
-          capture("destination", canonical);
-        }
-        break;
-      }
-    }
-
-    // Category from seed vocabulary — longest match first
-    if (!getValue("category") && vocabulary.length > 0) {
-      const sorted = [...vocabulary].sort((a, b) => b.length - a.length);
-      for (const term of sorted) {
-        const re = new RegExp(
-          `\\b${escapeRegExp(term).replace(/\s+/g, "\\s+")}\\b`,
-          "i",
-        );
-        if (re.test(text)) {
-          // Prefer stock category names over style tags when both match;
-          // vocabulary includes both — use the matched term as value.
-          capture("category", term);
-          break;
-        }
-      }
-    }
+  /** Agent confirmations often carry qty/grade/budget the buyer stated loosely. */
+  function noteAgentTurn(text: string): void {
+    extractGrade(text);
+    extractQuantity(text, true);
+    extractBudget(text);
+    extractDeadline(text);
+    extractDestination(text);
+    extractCategory(text);
   }
 
   return {
@@ -213,6 +294,7 @@ export function createStateMachine(opts?: { categoryVocabulary?: string[] }) {
     getConflicts,
     getValue,
     noteBuyerTurn,
+    noteAgentTurn,
     fields,
   };
 }

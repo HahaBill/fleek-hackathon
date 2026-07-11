@@ -26,26 +26,29 @@ The agent qualifies. The supplier closes.
 
 ## What it does
 
-- Answers buyer calls 24/7 in the browser, voice or text, on the same pipeline.
+- Answers buyer calls 24/7 in the browser, live voice or text, on the same pipeline.
 - Answers only from supplier-approved knowledge. It never invents a price or a promise.
-- Asks for the qualification fields it still needs, then confirms them back.
+- Fills the qualification fields live as the buyer talks, then confirms them back.
 - Escalates to a human when a rule says so, for example a discount ask or a complaint.
-- Produces a lead card with fields, transcript, summary, and a recommended next action.
+- Writes a lead card with a grounded summary, transcript, and a recommended next action.
 
 ## How it works
 
-One rule runs everything: the model talks, deterministic code decides. The LLM never sets a lead status, never invents a number, and never chooses to escalate.
+One rule runs everything: the model talks, deterministic code decides. The LLM never sets a lead status, never invents a number, and never chooses to escalate. When the call ends, the summary agent narrates the record the core already built. It rewords, it does not decide.
 
 ```mermaid
 %%{init: {'theme':'base','themeVariables':{'primaryColor':'#F6C445','primaryTextColor':'#0A0A0A','primaryBorderColor':'#C68A16','lineColor':'#F6C445','clusterBkg':'#141414','clusterBorder':'#333333'}}}%%
 flowchart LR
-  buyer([Buyer]) -->|voice or text| voice[Voice session]
-  voice -->|tool calls| core[Qualification core]
-  core -->|facts and rules| voice
-  voice -->|events| web[Supplier web app]
-  core -->|lead record| web
+  buyer([Buyer]) -->|voice or text| session[Agent session]
+  session <-->|tool calls, facts, rules| core[Qualification core]
+  core -->|live field updates| web[Supplier dashboard]
+  core -->|lead record| summary[Summary agent]
+  session -->|transcript| summary
+  summary -->|lead card| web
   web --> supplier([Supplier])
 ```
+
+For live voice, the qualification core runs in a session server (`apps/server`) and streams field updates to the browser over a WebSocket, so the chips fill in real time during the call.
 
 The deciding is done by four parts:
 
@@ -54,7 +57,13 @@ The deciding is done by four parts:
 | Qualification state machine | Tracks filled fields, picks the next question, moves the lead between states | Built and tested |
 | Escalation rules engine | Supplier-editable rules, checked on every turn | Built and tested |
 | Knowledge lookup | Returns catalogue facts, or `not_found` so the agent says it does not know | Built and tested |
-| Numeric provenance guardrail | Blocks any number that did not come from a knowledge lookup in the same call | Planned for the voice layer |
+| Numeric provenance guardrail | Rejects any number in the summary that did not come from a knowledge lookup, then falls back to a deterministic template | Built and tested |
+
+## Post-call summary
+
+The summary agent turns the finalised lead into a short brief plus a few grounded key points, each with its own label. The status and next action come from the deterministic core, so the card renders even with no LLM key. On any provider problem, no key, timeout, bad JSON, or an invented number, it degrades to a deterministic template and the card still renders.
+
+The eval harness (`@fleek/evals`) drives the pipeline through a set of buyer personas and asserts the agent stayed inside the rules: no ungrounded numbers, correct escalations, correct terminal status. It can run against a standalone scripted pipeline or the live server, and ships deliberately broken streams to prove the assertions catch a lying agent.
 
 ## Lead lifecycle
 
@@ -71,43 +80,52 @@ stateDiagram-v2
 
 ## Run it
 
-The UI runs against a mock transport that replays a scripted call, so text/demo mode works with no backend. Live voice chips need `@fleek/server` running alongside the web app.
+The project is a pnpm workspace. Live voice runs against an ElevenLabs agent, with the session server feeding the qualification chips. Text mode replays a scripted call, so it works with no backend.
 
 ```bash
 pnpm install
-pnpm -r test          # qualification core + server session tests
+pnpm -r test              # qualification core, summary, eval, and server tests
+pnpm evals                # run the persona eval suite
 
-# terminal 1 — session API for live voice chip updates
-pnpm dev:server       # http://localhost:3001
+# terminal 1: session server for live voice field updates
+pnpm dev:server           # http://localhost:3001
 
-# terminal 2 — Next.js UI
-cd web && pnpm dev    # http://localhost:3000
+# terminal 2: Next.js UI
+cd web && pnpm dev        # http://localhost:3000
 ```
 
-Or run both together: `pnpm dev`
+Or run both together from the root: `pnpm dev`
+
+Environment:
+
+- `OPENAI_API_KEY` is optional. Without it the summary agent uses its deterministic template. Set `SUMMARY_MODEL` to override the default model.
+- The ElevenLabs agent id ships with a default, so live voice works out of the box. Override with `NEXT_PUBLIC_ELEVENLABS_AGENT_ID`.
 
 Demo shortcuts:
 
-- Voice playback: `http://localhost:3000/?fixture=demo&autoplay=1`
-- Text mode: click "Type instead" on the home screen.
+- Live voice, autostart: `http://localhost:3000/?autoplay=1`
+- Scripted text demo: `http://localhost:3000/?autoplay=1&mode=text`
+- Text mode by hand: click "Type instead" on the home screen.
 
 ## Project layout
 
 ```
-packages/shared      Shared TypeScript contracts (events, lead, tools)
-packages/core        Deterministic qualification core, tests, seed catalogue
-packages/voice-client   Browser transport → @fleek/server (HTTP + WS)
-apps/server          Session API + WebSocket event bus for live voice chips
-web                  Next.js single-screen UI (idle, call, summary)
-plans              Build plans
+packages/shared        Shared TypeScript contracts (events, lead, tools)
+packages/core          Deterministic qualification core, tests, seed catalogue
+packages/summary       Post-call summary agent, grounded against the lead record
+packages/evals         Persona eval harness and rule assertions
+packages/voice-client  Browser transport to the session server (HTTP + WS)
+apps/server            Session API and WebSocket event bus for live voice
+web                    Next.js single-screen UI (idle, call, composing, summary)
+plans                  Build plans
 ```
 
 ## Stack
 
 - Next.js, React, TypeScript, Tailwind
-- ElevenLabs UI for the call screen (the orb and conversation view)
-- OpenAI Realtime or ElevenLabs for voice, behind a provider-agnostic transport
-- Vitest for the qualification core
+- ElevenLabs for the live voice call, agent and UI
+- OpenAI for the post-call summary agent, behind a template fallback
+- Vitest for the core, summary, eval, and server suites
 
 <div align="center">
 

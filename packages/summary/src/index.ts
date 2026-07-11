@@ -24,6 +24,9 @@ export interface SummaryAgentOptions {
 const OutputSchema = z.object({
   prose: z.string().min(1),
   insights: z.array(z.string()).default([]),
+  sections: z
+    .array(z.object({ title: z.string().min(1), points: z.array(z.string()).default([]) }))
+    .default([]),
   nextActionPhrasing: z.string().optional(),
 });
 
@@ -58,10 +61,30 @@ function groundOutput(
     if (!method.includes(email)) return null;
   }
 
-  const insights = raw.insights
+  // Sections and points get the same provenance discipline as the prose:
+  // ungrounded points are dropped, emptied sections disappear.
+  const sections = raw.sections
+    .map((s) => ({
+      title: s.title,
+      points: s.points.filter((p) => ungroundedNumbers(p, allowed).length === 0).slice(0, 3),
+    }))
+    .filter((s) => s.points.length > 0 && ungroundedNumbers(s.title, allowed).length === 0)
+    .slice(0, 4);
+
+  // insights stay populated for contract consumers that don't know sections:
+  // the model's own list if it sent one, else the leading point per section.
+  const insights = (
+    raw.insights.length > 0 ? raw.insights : sections.map((s) => `${s.title} — ${s.points[0]}`)
+  )
     .filter((i) => ungroundedNumbers(i, allowed).length === 0)
     .slice(0, 4);
-  return { prose: raw.prose, insights, nextActionPhrasing: raw.nextActionPhrasing };
+
+  return {
+    prose: raw.prose,
+    insights,
+    sections: sections.length > 0 ? sections : undefined,
+    nextActionPhrasing: raw.nextActionPhrasing,
+  };
 }
 
 function defaultClient(model: string): JsonCompleter | null {
@@ -79,7 +102,7 @@ function defaultClient(model: string): JsonCompleter | null {
           ],
           response_format: { type: "json_object" },
           // Not max_tokens: gpt-5.x models reject it; this works across 4o/4.1/5.x.
-          max_completion_tokens: 600,
+          max_completion_tokens: 900,
         },
         { signal }
       );

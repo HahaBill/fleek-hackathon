@@ -19,8 +19,11 @@ export function CallApp() {
   const { state, start, sendText, toggleMute, end, reset } = useCall();
   const voice = useElevenLabsVoice();
 
-  const inVoiceCall = voice.active;
+  const inVoiceCall = voice.active && voice.phase === "in_call";
   const inTextCall = state.phase === "in_call" && state.mode === "text";
+  // After a voice call the post-call flow lives in the voice hook (composing
+  // -> summary), mirroring useCall's phases for the text/mock path.
+  const voicePostCall = voice.phase === "composing" || voice.phase === "summary";
 
   // Autoplay from the URL, once, on mount.
   useEffect(() => {
@@ -50,7 +53,7 @@ export function CallApp() {
 
   return (
     <main className="flex min-h-dvh w-full items-center justify-center px-5 py-10">
-      {state.phase === "idle" && !inVoiceCall && (
+      {state.phase === "idle" && !inVoiceCall && !voicePostCall && (
         <IdleScreen
           onCall={() => void voice.start()}
           onText={() => start("text")}
@@ -71,6 +74,7 @@ export function CallApp() {
             insights: [],
             elapsed: voice.elapsed,
             muted: voice.muted,
+            pending: null,
           }}
           onMute={voice.toggleMute}
           onEnd={voice.end}
@@ -93,7 +97,7 @@ export function CallApp() {
         />
       )}
 
-      {state.phase === "composing" && <ComposingScreen />}
+      {(state.phase === "composing" || voice.phase === "composing") && <ComposingScreen />}
 
       {state.phase === "summary" && state.lead && (
         <SummaryCard
@@ -102,6 +106,16 @@ export function CallApp() {
           insights={state.insights}
           feed={state.feed}
           onNewCall={reset}
+        />
+      )}
+
+      {voice.phase === "summary" && voice.summary && (
+        <SummaryCard
+          lead={voice.summary.lead}
+          prose={voice.summary.prose}
+          insights={voice.summary.insights}
+          feed={voice.feed}
+          onNewCall={voice.reset}
         />
       )}
     </main>

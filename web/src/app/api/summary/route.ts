@@ -49,7 +49,9 @@ export async function POST(request: Request) {
     return Response.json({ error: "invalid summary input" }, { status: 400 });
   }
 
-  const agent = createSummaryAgent();
+  // Headroom over the package's 5s default (cold-start SDK + TLS); stays
+  // under the client fetch's 10s abort.
+  const agent = createSummaryAgent({ timeoutMs: 8_000 });
   const output = await agent({ lead: parsedLead.data, transcript, events });
   return Response.json(output);
 }

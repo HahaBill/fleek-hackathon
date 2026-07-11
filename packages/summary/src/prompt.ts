@@ -13,6 +13,7 @@ You are given the FINAL structured lead record (authoritative — you cannot cha
 
 Rules:
 - "prose": 2–3 sentences for the supplier. Plain, warm, specific.
+- The READER is the supplier. Never address the buyer ("Hi Maya…" is wrong); describe the buyer in third person ("Maya wants…").
 - "insights": up to 4 short observations. Each one must restate a provided signal; never invent your own observation.
 - Never state a field value that differs from the record. Never mention a price, quantity, or date that is not present in the record or the signals.
 - "nextActionPhrasing" is optional: a one-line rewording of the record's recommendedNextAction, nothing new.

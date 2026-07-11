@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@elevenlabs/react": "^1.10.0",
+    "@fleek/core": "workspace:*",
     "@fleek/shared": "workspace:*",
     "@fleek/summary": "workspace:*",
     "@react-three/drei": "^10.7.7",

@@ -5,7 +5,7 @@ import {
   type LeadRecord,
   type LeadStatus,
 } from "@fleek/shared";
-import type { ConflictEvent, StateMachine } from "./stateMachine.js";
+import type { ConflictEvent, StateMachine } from "./stateMachine";
 
 export class LeadValidationError extends Error {
   readonly name = "LeadValidationError";

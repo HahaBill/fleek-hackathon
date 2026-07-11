@@ -6,19 +6,19 @@ import type {
   QualificationCore,
   RuleId,
 } from "@fleek/shared";
-import { evaluateEscalations as runEscalationRules } from "./escalations.js";
+import { evaluateEscalations as runEscalationRules } from "./escalations";
 import {
   createKnowledgeService,
   type SeedData,
-} from "./knowledge.js";
+} from "./knowledge";
 import {
   assembleLead,
   missingFieldsFromMachine,
   validateUpsertArgs,
   type GuardrailEvent,
   type HandoffState,
-} from "./leadBuilder.js";
-import { createStateMachine } from "./stateMachine.js";
+} from "./leadBuilder";
+import { createStateMachine } from "./stateMachine";
 
 let leadCounter = 0;
 let handoffCounter = 0;

@@ -32,6 +32,7 @@ export interface CallState {
   lead: LeadRecord | null;
   prose: string;
   insights: string[];
+  sections?: { title: string; points: string[] }[];
   elapsed: number;
   muted: boolean;
   /** Transport's summary, held while the real composer runs (fallback copy). */
@@ -207,14 +208,18 @@ export function useCall() {
 
     let cancelled = false;
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 10_000);
+    const timer = setTimeout(() => controller.abort(), 20_000);
 
-    const finish = (prose: string, insights: string[]) => {
+    const finish = (
+      prose: string,
+      insights: string[],
+      sections?: { title: string; points: string[] }[]
+    ) => {
       if (cancelled) return;
       setState((s) =>
         s.phase !== "composing"
           ? s
-          : { ...s, phase: "summary", lead: pending.lead, prose, insights, pending: null }
+          : { ...s, phase: "summary", lead: pending.lead, prose, insights, sections, pending: null }
       );
     };
 
@@ -232,7 +237,9 @@ export function useCall() {
       signal: controller.signal,
     })
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`${res.status}`))))
-      .then((out: { prose: string; insights?: string[] }) => finish(out.prose, out.insights ?? []))
+      .then((out: { prose: string; insights?: string[]; sections?: { title: string; points: string[] }[] }) =>
+        finish(out.prose, out.insights ?? [], out.sections)
+      )
       .catch(() => finish(pending.prose, pending.insights))
       .finally(() => clearTimeout(timer));
 

@@ -44,14 +44,15 @@ export function composeFromTemplate(input: SummaryInput, signals: Signal[]): Sum
     }
   }
 
+  // "Label — detail" so the card can render Granola-style key points.
   const PHRASING: Record<Signal["id"], (s: Signal) => string> = {
-    escalation_fired: (s) => `Flagged for you — ${s.evidence}`,
-    upsell_volume: (s) => s.evidence,
-    deadline: (s) => `${s.evidence} — timing matters`,
-    quantity_vs_moq: (s) => s.evidence,
-    repeat_contact: (s) => s.evidence,
-    language_switch: (s) => s.evidence,
-    missing_fields: (s) => s.evidence,
+    escalation_fired: (s) => `Flagged — ${s.evidence}`,
+    upsell_volume: (s) => `Upsell — ${s.evidence}`,
+    deadline: (s) => `Timing — ${s.evidence.replace(/^Deadline: /, "needed ")}`,
+    quantity_vs_moq: (s) => `MOQ — ${s.evidence}`,
+    repeat_contact: (s) => `Repeat buyer — ${s.evidence.replace(/^Buyer sounds like a repeat customer: /, "")}`,
+    language_switch: (s) => `Language — ${s.evidence}`,
+    missing_fields: (s) => `Still missing — ${s.evidence.replace(/^Still missing: /, "")}`,
   };
   const ORDER: Signal["id"][] = [
     "escalation_fired",
@@ -66,5 +67,25 @@ export function composeFromTemplate(input: SummaryInput, signals: Signal[]): Sum
     .map((s) => PHRASING[s.id](s))
     .slice(0, 4);
 
-  return { prose, insights };
+  // Deterministic titled sections, same shape the LLM produces — the card
+  // renders identically whichever composer ran.
+  const bySignal = (ids: Signal["id"][]) =>
+    ORDER.filter((id) => ids.includes(id)).flatMap((id) => signals.filter((s) => s.id === id));
+
+  const sections: NonNullable<SummaryOutput["sections"]> = [];
+  const wantPoints: string[] = [];
+  if (want.length > 0) wantPoints.push(`${want.join(" of ").replace(" of (", " (")}${where}${when}`);
+  if (contact) wantPoints.push(`Contact: ${contact}`);
+  if (wantPoints.length > 0) sections.push({ title: "What the buyer wants", points: wantPoints });
+
+  const commercials = bySignal(["escalation_fired", "upsell_volume", "quantity_vs_moq"]).map((s) => s.evidence);
+  if (commercials.length > 0) sections.push({ title: "Commercials", points: commercials.slice(0, 3) });
+
+  const timing = bySignal(["deadline"]).map((s) => s.evidence);
+  if (timing.length > 0) sections.push({ title: "Timing", points: timing });
+
+  const notes = bySignal(["repeat_contact", "language_switch", "missing_fields"]).map((s) => s.evidence);
+  if (notes.length > 0) sections.push({ title: "Notes", points: notes.slice(0, 3) });
+
+  return { prose, insights, sections: sections.length > 0 ? sections : undefined };
 }

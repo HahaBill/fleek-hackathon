@@ -55,7 +55,18 @@ describe("template fallback composer", () => {
       const out = composeFromTemplate(input, signals);
       expect(ungroundedNumbers(out.prose, allowed)).toEqual([]);
       for (const i of out.insights) expect(ungroundedNumbers(i, allowed)).toEqual([]);
+      for (const sec of out.sections ?? []) {
+        for (const p of sec.points) expect(ungroundedNumbers(p, allowed)).toEqual([]);
+      }
     }
+  });
+
+  it("divides the summary into titled sections", () => {
+    const out = composeFromTemplate(DEMO_INPUT, computeSignals(DEMO_INPUT));
+    const titles = out.sections?.map((s) => s.title) ?? [];
+    expect(titles).toContain("What the buyer wants");
+    expect(titles).toContain("Commercials");
+    expect(out.sections!.every((s) => s.points.length > 0)).toBe(true);
   });
 });
 

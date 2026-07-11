@@ -106,6 +106,8 @@ export interface SummaryInput {
 export interface SummaryOutput {
   prose: string;
   insights: string[];
+  /** Granola-style titled sections chosen from the conversation (optional). */
+  sections?: { title: string; points: string[] }[];
   nextActionPhrasing?: string;
 }
 export type SummaryAgent = (input: SummaryInput) => Promise<SummaryOutput>;

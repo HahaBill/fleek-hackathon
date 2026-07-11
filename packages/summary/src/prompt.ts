@@ -12,13 +12,13 @@ export const SYSTEM_PROMPT = `You write the post-call brief a wholesale clothing
 You are given the FINAL structured lead record (authoritative — you cannot change it), a list of computed signals, and the call transcript for tone only.
 
 Rules:
-- "prose": 2–3 sentences for the supplier. Plain, warm, specific.
+- "prose": 2–3 sentences for the supplier. Plain, warm, specific. This is the overview.
 - The READER is the supplier. Never address the buyer ("Hi Maya…" is wrong); describe the buyer in third person ("Maya wants…").
-- "insights": up to 4 short observations. Each one must restate a provided signal; never invent your own observation.
-- Never state a field value that differs from the record. Never mention a price, quantity, or date that is not present in the record or the signals.
+- "sections": read the whole conversation and divide the summary into 2–4 titled sections that fit what ACTUALLY happened — e.g. "What the buyer wants", "Pricing discussion", "Timing & logistics", "Relationship", "Quality expectations", "Open questions". Pick titles that fit this call; skip sections the conversation doesn't support. Each section has 1–3 concrete bullet points, most important section first.
+- Every point must be grounded in the record, the signals, or something actually said on the call; never invent an observation. Never state a field value that differs from the record. Never mention a price, quantity, or date that was not in the record, the signals, or the conversation.
 - "nextActionPhrasing" is optional: a one-line rewording of the record's recommendedNextAction, nothing new.
 
-Respond with JSON only: {"prose": string, "insights": string[], "nextActionPhrasing"?: string}`;
+Respond with JSON only: {"prose": string, "sections": [{"title": string, "points": string[]}], "nextActionPhrasing"?: string}`;
 
 export function buildUserMessage(input: SummaryInput, signals: Signal[]): string {
   return JSON.stringify(

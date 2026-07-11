@@ -26,19 +26,20 @@ export const ESCALATION_RULES: EscalationRule[] = [
         /how much (does|do|is|are)/i.test(t)
       ) {
         // Still escalate if also negotiating
-        if (!/\b(discount|better|can you do|best price|if i take)\b/i.test(t)) {
+        if (!/\b(discount|better|(can|could) you do|best price|if i (take|commit to|order))\b/i.test(t)) {
           return false;
         }
       }
       return (
-        /\bcan you do\s*\$?\d/i.test(t) ||
+        /\b(can|could) you do\s*\$?\d/i.test(t) ||
         /\bany discount\b/i.test(t) ||
         /\bdiscount\b/i.test(t) ||
         /\bbest price\b/i.test(t) ||
         /\bbetter rate\b/i.test(t) ||
+        /\bvolume (deal|price)\b/i.test(t) ||
         /\bgive me a better\b/i.test(t) ||
-        /\bif i take\s+\d+/i.test(t) ||
-        /\bcan you do\b.*\$/i.test(t)
+        /\bif i (take|commit to|order)\s+\d+/i.test(t) ||
+        /\b(can|could) you do\b.*\$/i.test(t)
       );
     },
   },

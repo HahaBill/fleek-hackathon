@@ -128,5 +128,18 @@ describe("stateMachine", () => {
       sm.noteBuyerTurn("Can you do $1.80 if I take 400?");
       expect(sm.getValue("quantity")).toBe("200");
     });
+
+    it("captures a plain 'I would take N pieces' commitment", () => {
+      const sm = makeSm();
+      sm.noteBuyerTurn("I would take 200 pieces in Grade A.");
+      expect(sm.getValue("quantity")).toBe("200");
+    });
+
+    it("still skips the conditional 'if I commit to N' quantity", () => {
+      const sm = makeSm();
+      sm.capture("quantity", "200");
+      sm.noteBuyerTurn("Could you do 1.80 per piece if I commit to 400 pieces?");
+      expect(sm.getValue("quantity")).toBe("200");
+    });
   });
 });

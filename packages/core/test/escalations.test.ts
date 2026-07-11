@@ -16,6 +16,8 @@ describe("evaluateEscalations", () => {
       "any discount on bulk?",
       "best price if I take 400",
       "give me a better rate",
+      "could you do 1.80 per piece if I commit to 400?",
+      "my last supplier gave me a volume deal",
     ])("fires on %#: %s", (text) => {
       const fired = evaluateEscalations(text);
       expect(fired.some((f) => f.rule === "binding_price_request")).toBe(true);

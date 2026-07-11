@@ -53,9 +53,11 @@ const DEADLINE_RE = new RegExp(
 );
 const MONTH_ONLY_RE = new RegExp(`\\b(${MONTHS})(?:\\s+\\d{4})?\\b`, "i");
 
-/** Discount / negotiation phrasing — do not treat embedded qty as committed. */
+/** Discount / negotiation phrasing — do not treat embedded qty as committed.
+ *  Conditional commitments only ("if I take 400") — a plain "I'll take 200
+ *  pieces" IS the committed quantity and must capture. */
 const DISCOUNT_CONTEXT_RE =
-  /\b(can you do|discount|better rate|best price|if i take|take \d+)\b/i;
+  /\b(can you do|could you do|discount|better rate|best price|volume (deal|price)|if i (take|commit to|order))\b/i;
 
 export function createStateMachine(opts?: { categoryVocabulary?: string[] }) {
   const fields: Record<FieldName, FieldState> = Object.fromEntries(

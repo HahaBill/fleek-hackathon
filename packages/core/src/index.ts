@@ -1,9 +1,9 @@
-export { createCore } from "./core.js";
-export type { SeedData } from "./knowledge.js";
-export { LeadValidationError } from "./leadBuilder.js";
-export { evaluateEscalations, ESCALATION_RULES } from "./escalations.js";
+export { createCore } from "./core";
+export type { SeedData } from "./knowledge";
+export { LeadValidationError } from "./leadBuilder";
+export { evaluateEscalations, ESCALATION_RULES } from "./escalations";
 
-import type { SeedData } from "./knowledge.js";
+import type { SeedData } from "./knowledge";
 import seedJson from "./seed/karachi-vintage-co.json";
 
 export function loadSeed(): SeedData {

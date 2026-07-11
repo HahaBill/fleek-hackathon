@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // This package ships TS source (no build); typecheck with `tsc --noEmit`.
+    "declaration": false,
+    "noEmit": true
+  },
+  "include": ["src", "test", "fixtures"]
+}

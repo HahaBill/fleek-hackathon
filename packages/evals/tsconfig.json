@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // This package ships TS source (no build); typecheck with `tsc --noEmit`.
+    "declaration": false,
+    "noEmit": true,
+    // Node 22's built-in WebSocket matches the DOM type surface; @types/node
+    // doesn't declare the global yet.
+    "lib": ["ES2022", "DOM"]
+  },
+  "include": ["src", "test"]
+}

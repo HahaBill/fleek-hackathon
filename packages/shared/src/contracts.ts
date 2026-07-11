@@ -132,3 +132,9 @@ export interface SessionTransport {
   onEvent(cb: (e: AgentEvent) => void): () => void;
   setMuted?(muted: boolean): void;
 }
+
+// ---------- Wire credentials (voice mode; Plan 2 serves, per plans/00-shared.md) ----------
+export type VoiceProvider = "openai" | "elevenlabs";
+export type VoiceCredentials =
+  | { provider: "openai"; clientSecret: string }        // ephemeral Realtime client secret
+  | { provider: "elevenlabs"; signedUrl: string };      // signed ConvAI session URL

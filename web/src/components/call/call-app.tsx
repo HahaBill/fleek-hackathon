@@ -3,26 +3,34 @@
 import { useEffect } from "react";
 
 import { useCall } from "@/hooks/use-call";
+import { useElevenLabsVoice } from "@/hooks/use-elevenlabs-voice";
 import type { FixtureName } from "@/lib/transport";
 import { CallScreen } from "./call-screen";
 import { IdleScreen } from "./idle-screen";
 import { SummaryCard } from "./summary-card";
 
 /**
- * Orchestrates the single screen across its three states. All call logic lives
- * in `useCall`; this component only maps phase to view and wires demo
- * conveniences (Esc to hang up, and a `?fixture=demo|unresolved&autoplay=1`
- * param that auto-runs the mock as fallback rung 3).
+ * Orchestrates the single screen across its three states. Text mode and demo
+ * fixtures use `useCall`; live voice uses the ElevenLabs agent via
+ * `useElevenLabsVoice`.
  */
 export function CallApp() {
   const { state, start, sendText, toggleMute, end, reset } = useCall();
+  const voice = useElevenLabsVoice();
+
+  const inVoiceCall = voice.active;
+  const inTextCall = state.phase === "in_call" && state.mode === "text";
 
   // Autoplay from the URL, once, on mount.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("autoplay") === "1") {
       const fixture = (params.get("fixture") as FixtureName) ?? "demo";
-      start("voice", fixture === "unresolved" ? "unresolved" : "demo");
+      if (params.get("mode") === "text") {
+        start("text", fixture === "unresolved" ? "unresolved" : "demo");
+      } else {
+        void voice.start();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -30,19 +38,51 @@ export function CallApp() {
   // Esc hangs up during a live call (demo convenience).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && state.phase === "in_call") end();
+      if (e.key === "Escape") {
+        if (inVoiceCall) voice.end();
+        else if (inTextCall) end();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [state.phase, end]);
+  }, [inVoiceCall, inTextCall, voice, end]);
 
   return (
     <main className="flex min-h-dvh w-full items-center justify-center px-5 py-10">
-      {state.phase === "idle" && (
-        <IdleScreen onCall={() => start("voice")} onText={() => start("text")} />
+      {state.phase === "idle" && !inVoiceCall && (
+        <IdleScreen
+          onCall={() => void voice.start()}
+          onText={() => start("text")}
+          error={voice.error}
+        />
       )}
 
-      {state.phase === "in_call" && (
+      {inVoiceCall && (
+        <CallScreen
+          state={{
+            phase: "in_call",
+            mode: "voice",
+            feed: voice.feed,
+            chips: [],
+            agent: voice.agent,
+            lead: null,
+            prose: "",
+            insights: [],
+            elapsed: voice.elapsed,
+            muted: voice.muted,
+          }}
+          onMute={voice.toggleMute}
+          onEnd={voice.end}
+          onBack={voice.reset}
+          onSend={() => {}}
+          orbVolume={{
+            getInputVolume: voice.scaledInputVolume,
+            getOutputVolume: voice.scaledOutputVolume,
+          }}
+        />
+      )}
+
+      {inTextCall && (
         <CallScreen
           state={state}
           onMute={toggleMute}

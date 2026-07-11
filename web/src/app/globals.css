@@ -1,0 +1,154 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-serif: var(--font-serif);
+  --font-heading: var(--font-serif);
+
+  --color-clay: var(--clay);
+  --color-clay-foreground: var(--clay-foreground);
+  --color-status-qualified: var(--status-qualified);
+  --color-status-handoff: var(--status-handoff);
+  --color-status-unresolved: var(--status-unresolved);
+
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+}
+
+/*
+  Night shift palette. Warm near-black ink, cream text, a single clay accent.
+  The app renders dark-only, so :root and .dark carry the same values and the
+  page never flashes a light frame.
+*/
+:root,
+.dark {
+  --background: oklch(0.168 0.006 70);
+  --foreground: oklch(0.917 0.014 78);
+
+  --card: oklch(0.208 0.008 68);
+  --card-foreground: oklch(0.917 0.014 78);
+  --popover: oklch(0.205 0.008 68);
+  --popover-foreground: oklch(0.917 0.014 78);
+
+  --primary: oklch(0.7 0.112 54);
+  --primary-foreground: oklch(0.19 0.02 60);
+  --secondary: oklch(0.248 0.008 66);
+  --secondary-foreground: oklch(0.917 0.014 78);
+  --muted: oklch(0.24 0.008 66);
+  --muted-foreground: oklch(0.66 0.015 72);
+  --accent: oklch(0.26 0.01 64);
+  --accent-foreground: oklch(0.917 0.014 78);
+  --destructive: oklch(0.62 0.16 32);
+
+  --border: oklch(0.9 0.02 78 / 9%);
+  --input: oklch(0.9 0.02 78 / 13%);
+  --ring: oklch(0.7 0.112 54 / 55%);
+
+  --clay: oklch(0.71 0.114 52);
+  --clay-foreground: oklch(0.19 0.02 55);
+  --status-qualified: oklch(0.74 0.1 148);
+  --status-handoff: oklch(0.68 0.15 36);
+  --status-unresolved: oklch(0.64 0.008 70);
+
+  --radius: 0.7rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    /* Warm vignette so the flat ink reads as a lit room, not a void. */
+    background-image:
+      radial-gradient(
+        120% 80% at 50% -10%,
+        oklch(0.24 0.03 58 / 55%) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        90% 60% at 50% 120%,
+        oklch(0.2 0.02 50 / 40%) 0%,
+        transparent 55%
+      );
+    background-attachment: fixed;
+  }
+  /* Fine film grain over everything, kept very quiet. */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+@layer utilities {
+  /* Tabular serif figures for the timer and numeric lead fields. */
+  .font-numeric {
+    font-family: var(--font-serif);
+    font-feature-settings: "tnum" 1;
+    letter-spacing: -0.01em;
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  /* Low warm glow behind the orb. */
+  .orb-glow {
+    background: radial-gradient(
+      circle at 50% 50%,
+      oklch(0.7 0.12 55 / 28%) 0%,
+      oklch(0.6 0.1 45 / 10%) 38%,
+      transparent 70%
+    );
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-rise {
+  animation: rise-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}

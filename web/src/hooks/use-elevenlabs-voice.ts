@@ -9,8 +9,15 @@ import {
 } from "@elevenlabs/react";
 import { toast } from "sonner";
 
+import { useVoiceSessionTransport } from "@/components/call/voice-session-provider";
 import type { AgentUiState, FeedItem } from "@/hooks/use-call";
 import type { LeadRecord } from "@/lib/contracts";
+import {
+  INITIAL_VOICE_SESSION,
+  reduceAgentEvent,
+  resetVoiceSessionCounters,
+  type VoiceSessionState,
+} from "@/lib/voice-session";
 
 function scaleVolume(getVolume: () => number) {
   try {
@@ -43,6 +50,7 @@ const FALLBACK_LEAD: LeadRecord = {
 };
 
 export function useElevenLabsVoice() {
+  const transport = useVoiceSessionTransport();
   const { status, message } = useConversationStatus();
   const { startSession, endSession, getInputVolume, getOutputVolume } =
     useConversationControls();
@@ -50,6 +58,7 @@ export function useElevenLabsVoice() {
   const { mode } = useConversationMode();
 
   const [feed, setFeed] = useState<FeedItem[]>([]);
+  const [session, setSession] = useState<VoiceSessionState>(INITIAL_VOICE_SESSION);
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [phase, setPhase] = useState<VoicePhase>("idle");
@@ -59,6 +68,7 @@ export function useElevenLabsVoice() {
   const feedRef = useRef<FeedItem[]>([]);
   const composedRef = useRef(false);
   const generationRef = useRef(0);
+  const unsubRef = useRef<(() => void) | null>(null);
 
   const active = status === "connected" || status === "connecting";
 
@@ -68,6 +78,16 @@ export function useElevenLabsVoice() {
       : mode === "speaking"
         ? "talking"
         : "listening";
+
+  const applyServerEvent = useCallback((event: Parameters<typeof reduceAgentEvent>[1]) => {
+    setSession((prev) => {
+      const { state, feedAppends } = reduceAgentEvent(prev, event);
+      if (feedAppends.length > 0) {
+        setFeed((items) => [...items, ...feedAppends]);
+      }
+      return state;
+    });
+  }, []);
 
   const clearTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -126,12 +146,25 @@ export function useElevenLabsVoice() {
     try {
       setError(null);
       setFeed([]);
+      setSession(INITIAL_VOICE_SESSION);
       setElapsed(0);
       setSummary(null);
       turnSeq.current = 0;
       feedRef.current = [];
       composedRef.current = false;
       generationRef.current += 1;
+      resetVoiceSessionCounters();
+
+      unsubRef.current?.();
+      unsubRef.current = transport.onEvent(applyServerEvent);
+
+      try {
+        await transport.start("voice");
+      } catch (serverErr) {
+        console.warn("Qualification server unavailable, voice-only mode:", serverErr);
+        toast.error("Chips won't update — start the server with pnpm dev:server");
+      }
+
       await navigator.mediaDevices.getUserMedia({ audio: true });
       setPhase("in_call");
       startSession({
@@ -142,14 +175,20 @@ export function useElevenLabsVoice() {
           const item: FeedItem = { kind: "turn", key, role: speaker, text, streaming: false };
           feedRef.current = [...feedRef.current, item];
           setFeed((items) => [...items, item]);
+
+          if (transport.getSessionId()) {
+            void (speaker === "buyer"
+              ? transport.noteBuyerTurn(text)
+              : transport.noteAgentTurn(text));
+          }
         },
         onError: (msg) => {
           setError(msg);
           toast.error("Couldn't connect.", { description: msg });
         },
         onDisconnect: () => {
-          // Fires for BOTH user hang-up and agent-initiated call end.
           clearTimer();
+          transport.end();
           void compose();
         },
       });
@@ -166,13 +205,14 @@ export function useElevenLabsVoice() {
         setError("Couldn't start the call. Try again.");
       }
     }
-  }, [startSession, compose]);
+  }, [applyServerEvent, compose, startSession, transport]);
 
   const end = useCallback(() => {
     clearTimer();
     endSession();
+    transport.end();
     void compose();
-  }, [endSession, compose]);
+  }, [compose, endSession, transport]);
 
   const reset = useCallback(() => {
     if (active) endSession();
@@ -180,13 +220,18 @@ export function useElevenLabsVoice() {
     generationRef.current += 1;
     composedRef.current = false;
     feedRef.current = [];
+    unsubRef.current?.();
+    unsubRef.current = null;
     setFeed([]);
+    setSession(INITIAL_VOICE_SESSION);
     setElapsed(0);
     setError(null);
     setSummary(null);
     setPhase("idle");
     turnSeq.current = 0;
-  }, [active, endSession]);
+    resetVoiceSessionCounters();
+    transport.end();
+  }, [active, endSession, transport]);
 
   const toggleMute = useCallback(() => {
     setMuted(!isMuted);
@@ -208,13 +253,17 @@ export function useElevenLabsVoice() {
     }
   }, [status, message]);
 
-  useEffect(() => () => clearTimer(), []);
+  useEffect(() => () => {
+    clearTimer();
+    unsubRef.current?.();
+  }, []);
 
   return {
     status,
     active,
     error,
     feed,
+    chips: session.chips,
     elapsed,
     agent,
     muted: isMuted,

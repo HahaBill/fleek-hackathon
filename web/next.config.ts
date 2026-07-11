@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import type { NextConfig } from "next";
 
 const repoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
+const SERVER_URL = process.env.SERVER_URL ?? "http://localhost:3001";
 
 // The OpenAI key lives in the repo-root .env (shared with packages/*). Next
 // only auto-loads web/.env*, so pull the root file into the server process
@@ -14,11 +15,21 @@ try {
 }
 
 const nextConfig: NextConfig = {
-  // Pin module resolution to the repo root (pnpm-lock.yaml). Turbopack
-  // otherwise infers the root from stray lockfiles outside the repo and then
-  // refuses to resolve the @fleek/* workspace packages.
+  transpilePackages: ["@fleek/shared", "@fleek/voice-client"],
   turbopack: {
     root: repoRoot,
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/session/:path*",
+        destination: `${SERVER_URL}/api/session/:path*`,
+      },
+      {
+        source: "/ws/session/:path*",
+        destination: `${SERVER_URL}/ws/session/:path*`,
+      },
+    ];
   },
 };
 

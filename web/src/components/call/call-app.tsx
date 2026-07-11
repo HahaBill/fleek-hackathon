@@ -21,8 +21,6 @@ export function CallApp() {
 
   const inVoiceCall = voice.active && voice.phase === "in_call";
   const inTextCall = state.phase === "in_call" && state.mode === "text";
-  // After a voice call the post-call flow lives in the voice hook (composing
-  // -> summary), mirroring useCall's phases for the text/mock path.
   const voicePostCall = voice.phase === "composing" || voice.phase === "summary";
 
   // Autoplay from the URL, once, on mount.
@@ -67,7 +65,7 @@ export function CallApp() {
             phase: "in_call",
             mode: "voice",
             feed: voice.feed,
-            chips: [],
+            chips: voice.chips,
             agent: voice.agent,
             lead: null,
             prose: "",

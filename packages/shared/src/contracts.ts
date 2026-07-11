@@ -81,6 +81,8 @@ export type FieldChipState = { field: FieldName; state: "pending" | "captured"; 
 export interface QualificationCore {
   /** Deterministic per-turn update. Called after every buyer turn AND after every tool result. */
   noteBuyerTurn(text: string): void;
+  /** Extract confirmed facts from agent read-backs (qty, grade, budget, etc.). */
+  noteAgentTurn(text: string): void;
   searchKnowledge(query: string, filters?: Record<string, string>): KnowledgeResult;
   upsertLead(fields: Partial<LeadRecord["requirements"]> & { contact?: LeadRecord["contact"] }):
     { leadId: string; missingFields: FieldName[] };

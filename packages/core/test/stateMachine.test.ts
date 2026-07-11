@@ -122,6 +122,23 @@ describe("stateMachine", () => {
       expect(sm.getValue("category")).toBeTruthy();
     });
 
+    it("extracts bare quantity from need/want phrasing", () => {
+      const sm = makeSm();
+      sm.noteBuyerTurn("it needs to be high grade, and I need 100");
+      expect(sm.getValue("quantity")).toBe("100");
+      expect(sm.getValue("grade")).toBe("High");
+    });
+
+    it("extracts grade from graded AB agent read-back", () => {
+      const sm = makeSm();
+      sm.noteAgentTurn(
+        "For one hundred T shirts, graded AB, total one thousand two hundred dollars",
+      );
+      expect(sm.getValue("quantity")).toBe("100");
+      expect(sm.getValue("grade")).toBe("AB");
+      expect(sm.getValue("budget")).toBe("1200");
+    });
+
     it("does not overwrite quantity on discount ask with larger take qty", () => {
       const sm = makeSm();
       sm.capture("quantity", "200");

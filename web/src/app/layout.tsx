@@ -1,21 +1,22 @@
 import type { Metadata } from "next";
-import { Fraunces, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const serif = Fraunces({
-  variable: "--font-serif",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const sans = Hanken_Grotesk({
+const sans = Geist({
   variable: "--font-sans",
   subsets: ["latin"],
   display: "swap",
 });
 
-const mono = JetBrains_Mono({
+// Headings reuse Geist for a single, coherent voice — no decorative display face.
+const display = Geist({
+  variable: "--font-display",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const mono = Geist_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
   display: "swap",
@@ -35,7 +36,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${serif.variable} ${sans.variable} ${mono.variable} h-full`}
+      className={`dark ${display.variable} ${sans.variable} ${mono.variable} h-full`}
     >
       <body className="min-h-full flex flex-col">
         {children}

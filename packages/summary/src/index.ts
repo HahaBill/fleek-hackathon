@@ -38,6 +38,9 @@ function buildAllowlist(input: SummaryInput, signals: Signal[]): Set<number> {
   const allowed = collectNumbers(input.lead);
   for (const s of signals) collectNumbers(s.evidence, allowed);
   for (const e of input.events) collectNumbers(e.detail, allowed);
+  // Numbers actually spoken on the call are fair to reference (the PRD lists
+  // the transcript as composer input); pure inventions still get rejected.
+  for (const t of input.transcript) collectNumbers(t.text, allowed);
   return allowed;
 }
 
@@ -75,7 +78,8 @@ function defaultClient(model: string): JsonCompleter | null {
             { role: "user", content: user },
           ],
           response_format: { type: "json_object" },
-          max_tokens: 500,
+          // Not max_tokens: gpt-5.x models reject it; this works across 4o/4.1/5.x.
+          max_completion_tokens: 600,
         },
         { signal }
       );

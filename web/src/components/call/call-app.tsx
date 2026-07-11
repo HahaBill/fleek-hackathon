@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useCall } from "@/hooks/use-call";
 import type { FixtureName } from "@/lib/transport";
 import { CallScreen } from "./call-screen";
+import { ComposingScreen } from "./composing-screen";
 import { IdleScreen } from "./idle-screen";
 import { SummaryCard } from "./summary-card";
 
@@ -51,6 +52,8 @@ export function CallApp() {
           onSend={sendText}
         />
       )}
+
+      {state.phase === "composing" && <ComposingScreen />}
 
       {state.phase === "summary" && state.lead && (
         <SummaryCard

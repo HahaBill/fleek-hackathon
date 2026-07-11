@@ -11,7 +11,7 @@ import type {
 } from "@/lib/contracts";
 import { createTransport, type FixtureName } from "@/lib/transport";
 
-export type CallPhase = "idle" | "in_call" | "summary";
+export type CallPhase = "idle" | "in_call" | "composing" | "summary";
 export type CallMode = "voice" | "text";
 
 /** Orb / ambience state, derived from the event stream (not on the wire). */
@@ -34,6 +34,8 @@ export interface CallState {
   insights: string[];
   elapsed: number;
   muted: boolean;
+  /** Transport's summary, held while the real composer runs (fallback copy). */
+  pending: { lead: LeadRecord; prose: string; insights: string[] } | null;
 }
 
 const INITIAL: CallState = {
@@ -47,6 +49,7 @@ const INITIAL: CallState = {
   insights: [],
   elapsed: 0,
   muted: false,
+  pending: null,
 };
 
 let toolSeq = 0;
@@ -115,16 +118,17 @@ export function useCall() {
           if (e.endedBy === "error") {
             return s; // handled by fail() below
           }
-          return { ...s, agent: null };
+          // The record is final; the summary agent is now writing the prose.
+          return { ...s, phase: "composing", agent: null };
 
         case "summary.ready":
+          // The transport's lead is authoritative. Hold its prose/insights as
+          // the fallback while the real composer runs (effect below).
           return {
             ...s,
-            phase: "summary",
+            phase: "composing",
             agent: null,
-            lead: e.lead,
-            prose: e.prose,
-            insights: e.insights ?? [],
+            pending: { lead: e.lead, prose: e.prose, insights: e.insights ?? [] },
           };
 
         default:
@@ -191,6 +195,53 @@ export function useCall() {
   useEffect(() => {
     if (state.phase !== "in_call") clearTimer();
   }, [state.phase]);
+
+  // Run the real summary agent (packages/summary, via /api/summary) over the
+  // finalized record. Stopgap until the voice server composes summary.ready
+  // itself (plans/02 §7) — delete this effect at that checkpoint. On any
+  // failure or a 10s timeout the transport's own prose renders instead; the
+  // card is never blocked by the composer.
+  useEffect(() => {
+    const pending = state.pending;
+    if (state.phase !== "composing" || !pending) return;
+
+    let cancelled = false;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10_000);
+
+    const finish = (prose: string, insights: string[]) => {
+      if (cancelled) return;
+      setState((s) =>
+        s.phase !== "composing"
+          ? s
+          : { ...s, phase: "summary", lead: pending.lead, prose, insights, pending: null }
+      );
+    };
+
+    const transcript = state.feed.flatMap((f) =>
+      f.kind === "turn" ? [{ role: f.role, text: f.text }] : []
+    );
+    const events = state.feed.flatMap((f) =>
+      f.kind === "guardrail" ? [{ kind: f.variant, detail: f.detail }] : []
+    );
+
+    fetch("/api/summary", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ lead: pending.lead, transcript, events }),
+      signal: controller.signal,
+    })
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`${res.status}`))))
+      .then((out: { prose: string; insights?: string[] }) => finish(out.prose, out.insights ?? []))
+      .catch(() => finish(pending.prose, pending.insights))
+      .finally(() => clearTimeout(timer));
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [state.phase, state.pending, state.feed]);
 
   useEffect(() => () => teardown(), [teardown]);
 

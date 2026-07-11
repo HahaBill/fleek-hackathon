@@ -29,7 +29,7 @@ export function ChipsRow({ chips }: { chips: FieldChipState[] }) {
             className={cn(
               "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors",
               captured
-                ? "border-clay/40 bg-clay/10 text-foreground"
+                ? "border-fleek/30 bg-fleek/[0.08] text-foreground"
                 : "border-dashed border-border text-muted-foreground"
             )}
           >
@@ -44,7 +44,7 @@ export function ChipsRow({ chips }: { chips: FieldChipState[] }) {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex items-center gap-1 font-medium"
                 >
-                  <Check className="size-3 text-clay" strokeWidth={2.5} />
+                  <Check className="size-3 text-fleek" strokeWidth={2.5} />
                   {chip.value}
                 </motion.span>
               ) : (

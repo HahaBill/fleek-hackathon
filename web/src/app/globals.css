@@ -9,11 +9,16 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
-  --font-serif: var(--font-serif);
-  --font-heading: var(--font-serif);
+  --font-display: var(--font-display);
+  --font-heading: var(--font-display);
+  --font-serif: var(--font-display);
 
-  --color-clay: var(--clay);
-  --color-clay-foreground: var(--clay-foreground);
+  --color-fleek: var(--fleek);
+  --color-fleek-foreground: var(--fleek-foreground);
+  /* Legacy alias so older class names keep resolving to the brand accent. */
+  --color-clay: var(--fleek);
+  --color-clay-foreground: var(--fleek-foreground);
+
   --color-status-qualified: var(--status-qualified);
   --color-status-handoff: var(--status-handoff);
   --color-status-unresolved: var(--status-unresolved);
@@ -36,49 +41,52 @@
   --color-card: var(--card);
 
   --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
+  --radius-md: calc(var(--radius) * 0.85);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-xl: calc(var(--radius) * 1.5);
+  --radius-2xl: calc(var(--radius) * 2);
+  --radius-3xl: calc(var(--radius) * 2.6);
 }
 
 /*
-  Night shift palette. Warm near-black ink, cream text, a single clay accent.
-  The app renders dark-only, so :root and .dark carry the same values and the
-  page never flashes a light frame.
+  Calm, near-monochrome night. A true neutral dark surface, soft off-white ink,
+  and Fleek gold held back as a single, rare accent (the orb, a captured field,
+  the one primary action). No glow, no grain, no flat yellow blocks — the
+  restraint is the design. Dark-only, so :root and .dark carry the same values.
 */
 :root,
 .dark {
-  --background: oklch(0.168 0.006 70);
-  --foreground: oklch(0.917 0.014 78);
+  --background: oklch(0.165 0.003 260);
+  --foreground: oklch(0.965 0.002 260);
 
-  --card: oklch(0.208 0.008 68);
-  --card-foreground: oklch(0.917 0.014 78);
-  --popover: oklch(0.205 0.008 68);
-  --popover-foreground: oklch(0.917 0.014 78);
+  --card: oklch(0.198 0.003 260);
+  --card-foreground: oklch(0.965 0.002 260);
+  --popover: oklch(0.198 0.003 260);
+  --popover-foreground: oklch(0.965 0.002 260);
 
-  --primary: oklch(0.7 0.112 54);
-  --primary-foreground: oklch(0.19 0.02 60);
-  --secondary: oklch(0.248 0.008 66);
-  --secondary-foreground: oklch(0.917 0.014 78);
-  --muted: oklch(0.24 0.008 66);
-  --muted-foreground: oklch(0.66 0.015 72);
-  --accent: oklch(0.26 0.01 64);
-  --accent-foreground: oklch(0.917 0.014 78);
-  --destructive: oklch(0.62 0.16 32);
+  --fleek: #f6c445;
+  --fleek-foreground: #1a1505;
 
-  --border: oklch(0.9 0.02 78 / 9%);
-  --input: oklch(0.9 0.02 78 / 13%);
-  --ring: oklch(0.7 0.112 54 / 55%);
+  /* Primary is a quiet near-white, ElevenLabs-style. Gold is opt-in. */
+  --primary: oklch(0.965 0.002 260);
+  --primary-foreground: oklch(0.19 0.003 260);
+  --secondary: oklch(0.238 0.003 260);
+  --secondary-foreground: oklch(0.965 0.002 260);
+  --muted: oklch(0.238 0.003 260);
+  --muted-foreground: oklch(0.66 0.004 260);
+  --accent: oklch(0.255 0.003 260);
+  --accent-foreground: oklch(0.965 0.002 260);
+  --destructive: oklch(0.63 0.17 25);
 
-  --clay: oklch(0.71 0.114 52);
-  --clay-foreground: oklch(0.19 0.02 55);
-  --status-qualified: oklch(0.74 0.1 148);
-  --status-handoff: oklch(0.68 0.15 36);
-  --status-unresolved: oklch(0.64 0.008 70);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.55 0.004 260);
 
-  --radius: 0.7rem;
+  --status-qualified: oklch(0.78 0.13 150);
+  --status-handoff: oklch(0.74 0.15 55);
+  --status-unresolved: oklch(0.64 0.004 260);
+
+  --radius: 0.75rem;
 }
 
 @layer base {
@@ -91,50 +99,17 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    /* Warm vignette so the flat ink reads as a lit room, not a void. */
-    background-image:
-      radial-gradient(
-        120% 80% at 50% -10%,
-        oklch(0.24 0.03 58 / 55%) 0%,
-        transparent 60%
-      ),
-      radial-gradient(
-        90% 60% at 50% 120%,
-        oklch(0.2 0.02 50 / 40%) 0%,
-        transparent 55%
-      );
-    background-attachment: fixed;
-  }
-  /* Fine film grain over everything, kept very quiet. */
-  body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    pointer-events: none;
-    opacity: 0.035;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 }
 
 @layer utilities {
-  /* Tabular serif figures for the timer and numeric lead fields. */
+  /* Tabular figures for the timer and numeric fields. */
   .font-numeric {
-    font-family: var(--font-serif);
     font-feature-settings: "tnum" 1;
     letter-spacing: -0.01em;
   }
   .text-balance {
     text-wrap: balance;
-  }
-  /* Low warm glow behind the orb. */
-  .orb-glow {
-    background: radial-gradient(
-      circle at 50% 50%,
-      oklch(0.7 0.12 55 / 28%) 0%,
-      oklch(0.6 0.1 45 / 10%) 38%,
-      transparent 70%
-    );
   }
 }
 

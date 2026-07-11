@@ -60,15 +60,28 @@ export class MockTransport implements SessionTransport {
     return t;
   }
 
+  /**
+   * The fixture hardcodes `session.started` as voice. Rewrite it to whatever
+   * mode the caller actually started in, so text mode doesn't get flipped back
+   * to voice when the event is applied.
+   */
+  private withMode(items: TimedEvent[]): TimedEvent[] {
+    return items.map((item) =>
+      item.event.type === "session.started"
+        ? { ...item, event: { ...item.event, mode: this.mode } }
+        : item
+    );
+  }
+
   async start(mode: "voice" | "text") {
     this.mode = mode;
     this.done = false;
     this.beatIndex = 0;
     if (mode === "voice") {
-      this.play(this.fixture);
+      this.play(this.withMode(this.fixture));
     } else {
       // Emit the preamble (session.started) and wait for the first sendText.
-      this.play(this.preamble);
+      this.play(this.withMode(this.preamble));
     }
   }
 

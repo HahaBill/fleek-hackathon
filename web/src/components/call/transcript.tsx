@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 export function Transcript({ feed }: { feed: FeedItem[] }) {
   return (
     <Conversation className="h-full">
-      <ConversationContent className="mx-auto flex max-w-xl flex-col gap-1 px-1 py-2">
+      <ConversationContent className="mx-auto flex max-w-xl flex-col gap-1 px-3 pt-3 pb-5">
         {feed.map((item) => {
           if (item.kind === "turn") {
             return (
@@ -55,7 +55,7 @@ export function Transcript({ feed }: { feed: FeedItem[] }) {
           return (
             <div
               key={item.key}
-              className="my-1 flex items-center gap-2 rounded-md border border-clay/30 bg-clay/[0.07] px-2.5 py-1.5 text-xs text-clay"
+              className="my-1 flex items-center gap-2 rounded-lg border border-status-handoff/25 bg-status-handoff/[0.07] px-2.5 py-1.5 text-xs text-status-handoff"
             >
               <TriangleAlert className="size-3.5 shrink-0" strokeWidth={2} />
               <span className="font-medium">Escalated: {item.detail}</span>

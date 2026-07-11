@@ -48,7 +48,7 @@ export function TextComposer({
         size="icon"
         onClick={submit}
         disabled={disabled || !value.trim()}
-        className="size-9 shrink-0 rounded-full bg-clay text-clay-foreground hover:bg-clay disabled:opacity-40"
+        className="size-9 shrink-0 rounded-full disabled:opacity-40"
         aria-label="Send"
       >
         <ArrowUp className="size-4" strokeWidth={2.5} />

@@ -43,7 +43,13 @@ export function CallApp() {
       )}
 
       {state.phase === "in_call" && (
-        <CallScreen state={state} onMute={toggleMute} onEnd={end} onSend={sendText} />
+        <CallScreen
+          state={state}
+          onMute={toggleMute}
+          onEnd={end}
+          onBack={reset}
+          onSend={sendText}
+        />
       )}
 
       {state.phase === "summary" && state.lead && (

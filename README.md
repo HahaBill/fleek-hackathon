@@ -1,6 +1,6 @@
 <div align="center">
 
-# Supplier Voice Agent
+# SupConnect: Supplier Voice Agent
 
 **An inbound AI voice agent that answers buyer calls for secondhand clothing suppliers, qualifies the deal inside supplier rules, and hands over a ready-to-action lead.**
 

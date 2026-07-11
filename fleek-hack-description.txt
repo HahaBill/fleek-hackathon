@@ -1,0 +1,51 @@
+Join Fleek and a16z for a one-day hackathon to build vision-language and LLM-powered tools that make circular fashion work at scale. Spend the day building with mentors from the Fleek product and engineering teams, ship a working demo, and compete for Cursor prizes.
+Secondhand is the fastest-growing corner of fashion - and the hardest to scale. Every item is one-of-a-kind: a single photo, no SKU, no clean data. New retail is a solved problem; secondhand is wide open. It's exactly the kind of messy, visual, real-world challenge that modern AI was built for.
+Judges:
+	•	Olivia Moore - AI Applications Partner @ a16z
+	•	Abhi Arora - CEO @ Fleek (YC W22)
+	•	Sanket Agarwal - CTO @ Fleek (YC W22)
+	•	Jeremy Hindle - Co-Founder & CTPO at Custodian
+	•	Nicolai Eddy - Co-Founder & COO at NALA
+	•	Alex Nikityuk - Head of AI @ Fleek
+	•	Francisco Terpolilli - Cursor Ambassador 🤌
+Bring a laptop and an idea. Leave with something real!
+The Challenge: pick a track
+🔍 Vision Vision-language models for the hard parts of resale: cataloging, grading, authentication, defect detection, and visual search across millions of unique items.
+🤖 Agents & LLMs Agentic and LLM-powered tools for sourcing, pricing, GTM tooling, negotiations, customer experience, and ops automation.
+♻️ Circular Moonshot Open wildcard - anything that pushes the circular economy forward: impact measurement, waste reduction, or reimagining how people buy and sell secondhand.
+Agenda
+9:30 – Doors open, check-in & breakfast 10:30 – Welcome from Fleek 11:00 – Build begins! 13:30 – Lunch 14:30 – Build + mentor office hours (Fleek eng team) 16:30 – Checkpoint 18:00 – Submission deadline 18:30 – Demos 20:00 – Awards 20:30 – Drinks & networking
+Prizes
+	•	1st prize - 6 months Cursor ultra plan
+	•	2nd prize - 4 months Cursor ultra plan
+	•	3rd prize - 3 months Cursor ultra plan
+What you'll get
+	•	A working demo built in a day
+	•	On-day $50 Cursor credits
+	•	Direct mentorship from our team and judges
+	•	A room full of strong builders to work and network with
+Who should join
+Engineers, ML/CV practitioners, designers, and founders who want to build AI for good products. Mid-to-senior engineers especially welcome. Come solo or with a team - we'll help solo builders find one.
+What to bring
+	•	Laptop + charger
+	•	Cursor installed and signed in (download here)
+	•	Your GitHub
+	•	An idea (optional)
+Partners
+	•	Hosted by: a16z × Fleek, at Fleek HQ
+	•	Powered by: Cursor
+FAQ
+Do I need a team? No - come solo or with up to four. We run team formation in the morning.
+How technical do I need to be? This is a builder's hackathon - you should be able to ship something in a day. Designers and PMs are welcome on teams.
+Who owns what I build? You own your work.
+Is it really free? Yes. Capacity is limited and registration is approval-based, so RSVP early.
+Accessibility / dietary needs? Tell us your dietary requirements when you register.
+We're hiring 👋
+Fleek is actively hiring engineers, and this is the most fun way to meet the team. Check out open roles here: joinfleek.com/careers
+Blasts
+
+
+Alex Nikityuk
+Yesterday, 11:21
+We are looking forward to seeing you tomorrow
+Hi there,  Quick one ahead of Saturday — you're confirmed for the Fleek x a16z Hackathon and we're really looking forward to having you building with us.  The essentials: - Sat 11 July — 9:30am check-in + breakfast, building kicks off at 11am, demos & awards from 6:30pm - Fleek HQ, London (full address is in your Luma confirmation) - Bring: laptop, charger, your GitHub, and Cursor installed - Cursor-powered: $50 credits each, Cursor Ultra for the winning teams, and mentors on hand all day  It's going to be a genuinely strong room of founders, engineers and builders shipping AI for circular fashion.

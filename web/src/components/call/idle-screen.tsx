@@ -2,6 +2,7 @@
 
 import { Phone } from "lucide-react";
 
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Orb } from "@/components/ui/orb";
 import { ORB_COLORS } from "./supplier-header";
@@ -14,9 +15,11 @@ import { ORB_COLORS } from "./supplier-header";
 export function IdleScreen({
   onCall,
   onText,
+  error,
 }: {
   onCall: () => void;
   onText: () => void;
+  error?: string | null;
 }) {
   return (
     <div className="flex min-h-[88vh] w-full max-w-2xl flex-col items-center justify-center gap-12 text-center animate-rise">
@@ -45,8 +48,13 @@ export function IdleScreen({
           Call supplier
         </Button>
 
-        <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
-          Answered by an AI assistant and transcribed.
+        <p
+          className={cn(
+            "max-w-xs text-sm leading-relaxed",
+            error ? "text-destructive" : "text-muted-foreground"
+          )}
+        >
+          {error ?? "Answered by an AI assistant and transcribed."}
         </p>
 
         <button
